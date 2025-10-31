@@ -1,0 +1,52 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for ansible-role-coredns
+
+- name: "Ensure directories exists"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ coredns_user }}"
+    group: "{{ coredns_group }}"
+    mode: '0755'
+  loop:
+    - "{{ coredns_etc_dir }}"
+    - "{{ coredns_opt_dir }}"
+    - "{{ coredns_zones_path }}"
+
+- name: "Deploy Corefile file"
+  ansible.builtin.template:
+    src: "Corefile.j2"
+    dest: "{{ coredns_etc_dir }}/Corefile"
+    owner: "{{ coredns_user }}"
+    group: "{{ coredns_group }}"
+    mode: '0644'
+
+- name: "Generate CoreDNS zone files"
+  template:
+    src: zone.j2
+    dest: "{{ coredns_zones_path }}/{{ item.key }}.db"
+    owner: "{{ coredns_user }}"
+    group: "{{ coredns_group }}"
+    mode: '0644'
+  loop: "{{ coredns_zones | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+    index_var: "zone_index"
+  vars:
+    zone: "{{ item.value }}"
+    # Serial pattern: YYYYMMDD + loop index padded (e.g. 01)
+    zone_serial: "{{ ansible_date_time.date | regex_replace('-', '') }}{{ '%02d' | format(zone_index + 1) }}"
+
+- name: "Deploy docker-compose.yml"
+  ansible.builtin.template:
+    src: "docker-compose.yml.j2"
+    dest: "{{ coredns_opt_dir }}/docker-compose.yml"
+    owner: "{{ coredns_user }}"
+    group: "{{ coredns_group }}"
+    mode: '0644'
+
+- name: "Starting the service"
+  community.docker.docker_compose_v2:
+    project_src: "{{ coredns_opt_dir }}"
+    state: present

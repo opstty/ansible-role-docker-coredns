@@ -1,0 +1,63 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for ansible-role-coredns
+# Docker
+coredns_service_name: "coredns"
+coredns_container_name: "coredns"
+coredns_domain_name: "opstty.home"
+coredns_image: "coredns/coredns:latest"
+coredns_environment_tz: "Europe/Paris"
+coredns_network_name: ""
+coredns_network_ipv4_address: ""
+coredns_network_mac_address: ""
+
+# Directories
+coredns_etc_dir: "/etc/coredns"
+coredns_opt_dir: "/opt/coredns"
+coredns_zones_path: "{{ coredns_etc_dir }}/zones"
+
+# User
+coredns_user: "root"
+coredns_group: "root"
+
+# Corefile
+coredns_forward_ip: ""
+
+# Zones
+coredns_zones:
+  "{{ coredns_domain_name }}":
+    ttl: 3600
+    soa:
+      primary_ns: "ns1.{{ coredns_domain_name }}."
+      hostmaster: "hostmaster.{{ coredns_domain_name }}."
+      refresh: 7200
+      retry: 3600
+      expire: 1209600
+      minimum: 3600
+    records:
+      - type: NS
+        name: "@"
+        value: ns1.{{ coredns_domain_name }}.
+      - type: A
+        name: ns1
+        value: 192.168.1.10
+
+  internal.lan:
+    ttl: 300
+    soa:
+      primary_ns: ns1.internal.lan.
+      hostmaster: admin.internal.lan.
+      refresh: 7200
+      retry: 3600
+      expire: 1209600
+      minimum: 300
+    records:
+      - type: NS
+        name: "@"
+        value: ns1.internal.lan.
+      - type: A
+        name: ns1
+        value: 10.0.0.1
+      - type: A
+        name: srv01
+        value: 10.0.0.2
