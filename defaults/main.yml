@@ -10,6 +10,7 @@ coredns_environment_tz: "Europe/Paris"
 coredns_network_name: ""
 coredns_network_ipv4_address: ""
 coredns_network_mac_address: ""
+coredns_command: ""
 
 # Directories
 coredns_etc_dir: "/etc/coredns"

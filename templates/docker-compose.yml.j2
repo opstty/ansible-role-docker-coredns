@@ -16,7 +16,7 @@ services:
         mac_address: "{{ coredns_network_mac_address }}"
     volumes:
       - {{ coredns_etc_dir }}:/etc/coredns
-    command: -conf /etc/coredns/Corefile
+    command: "{{ coredns_command }}"
     restart: unless-stopped
 
 networks:
