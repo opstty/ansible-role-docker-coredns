@@ -1,3 +1,8 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # handlers file for ansible-role-coredns
+
+- name: "Restart CoreDNS service"
+  community.docker.docker_compose_v2:
+    project_src: "{{ coredns_opt_dir }}"
+    state: present

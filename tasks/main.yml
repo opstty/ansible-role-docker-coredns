@@ -4,11 +4,11 @@
 
 - name: "Ensure directories exists"
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ item.path | default(item) }}"
     state: directory
     owner: "{{ coredns_user }}"
     group: "{{ coredns_group }}"
-    mode: '0755'
+    mode: "{{ item.mode | default('0755') }}"
   loop:
     - "{{ coredns_etc_dir }}"
     - "{{ coredns_opt_dir }}"
@@ -21,6 +21,7 @@
     owner: "{{ coredns_user }}"
     group: "{{ coredns_group }}"
     mode: '0644'
+  notify: "Restart CoreDNS service"
 
 - name: "Generate CoreDNS zone files"
   template:
@@ -37,6 +38,7 @@
     zone: "{{ item.value }}"
     # Serial pattern: YYYYMMDD + loop index padded (e.g. 01)
     zone_serial: "{{ ansible_date_time.date | regex_replace('-', '') }}{{ '%02d' | format(zone_index + 1) }}"
+  notify: "Restart CoreDNS service"
 
 - name: "Deploy docker-compose.yml"
   ansible.builtin.template:
