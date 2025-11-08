@@ -31,17 +31,14 @@ coredns_zones:
     soa:
       primary_ns: "ns1.{{ coredns_domain_name }}."
       hostmaster: "hostmaster.{{ coredns_domain_name }}."
-      refresh: 7200
-      retry: 3600
-      expire: 1209600
-      minimum: 3600
+      refresh: 3600
+      retry: 1800
+      expire: 604800
+      minimum: 300
     records:
-      - type: NS
-        name: "@"
-        value: ns1.{{ coredns_domain_name }}.
-      - type: A
-        name: ns1
-        value: 192.168.1.10
+      - name: ns1
+        type: A
+        value: "192.168.1.10"
 
   internal.lan:
     ttl: 300

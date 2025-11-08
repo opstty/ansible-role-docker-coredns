@@ -26,7 +26,7 @@
 - name: "Generate CoreDNS zone files"
   template:
     src: zone.j2
-    dest: "{{ coredns_zones_path }}/{{ item.key }}.db"
+    dest: "{{ coredns_zones_path }}/db.{{ item.key }}"
     owner: "{{ coredns_user }}"
     group: "{{ coredns_group }}"
     mode: '0644'
@@ -36,8 +36,7 @@
     index_var: "zone_index"
   vars:
     zone: "{{ item.value }}"
-    # Serial pattern: YYYYMMDD + loop index padded (e.g. 01)
-    zone_serial: "{{ ansible_date_time.date | regex_replace('-', '') }}{{ '%02d' | format(zone_index + 1) }}"
+    zone_serial: "{{ ansible_date_time.epoch }}"
   notify: "Restart CoreDNS service"
 
 - name: "Deploy docker-compose.yml"
