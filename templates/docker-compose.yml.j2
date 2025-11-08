@@ -10,15 +10,36 @@ services:
     image: {{ coredns_image }}
     environment:
       - TZ={{ coredns_environment_tz }}
+{% if coredns_network_bridge_enable | bool %}
+    ports:
+{% for port in coredns_network_bridge_ports %}
+      - {{ port }}
+{% endfor %}
+{% endif %}
+{% if (coredns_network_macvlan_enable or coredns_network_traefik_enable) | bool %}
     networks:
-      {{ coredns_network_name }}:
-        ipv4_address: "{{ coredns_network_ipv4_address }}"
-        mac_address: "{{ coredns_network_mac_address }}"
+{% if coredns_network_macvlan_enable | bool %}
+      {{ coredns_network_macvlan_network_name }}:
+        ipv4_address: {{ coredns_network_macvlan_ipv4_address }}
+        mac_address: {{ coredns_network_macvlan_mac_address }}
+{% endif %}
+{% if coredns_network_traefik_enable | bool %}
+      {{ coredns_network_traefik_network_name }}:
+{% endif %}
+{% endif %}
     volumes:
       - {{ coredns_etc_dir }}:/etc/coredns
     command: "{{ coredns_command }}"
     restart: unless-stopped
 
+{% if (coredns_network_macvlan_enable or coredns_network_traefik_enable) | bool %}
 networks:
-  {{ coredns_network_name }}:
+{% if coredns_network_macvlan_enable | bool %}
+  {{ coredns_network_macvlan_network_name }}:
     external: true
+{% endif %}
+{% if coredns_network_traefik_enable | bool %}
+  {{ coredns_network_traefik_network_name }}:
+    external: true
+{% endif %}
+{% endif %}
